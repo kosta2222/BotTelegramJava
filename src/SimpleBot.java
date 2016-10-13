@@ -1,14 +1,31 @@
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.telegram.telegrambots.TelegramApiException;
 import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
  
 public class SimpleBot extends TelegramLongPollingBot {
+ManagmentSystem ms=null;
+Connection connection=null;
+Statement statement=null;
+ResultSet resultSet=null;
+    public SimpleBot() {
+	try{
+        ms=ManagmentSystem.getInstance("pathToConfig");
+        connection=ms.getConn();
+
+}catch(Exception ex){
+Logger.getLogger(SimpleBot.class.getName()).log(Level.SEVERE, null, ex);
+}
+}
+    
  
 	public static void main(String[] args) {
 		TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
@@ -31,6 +48,14 @@ public class SimpleBot extends TelegramLongPollingBot {
  
 	@Override
 	public void onUpdateReceived(Update update) {
+	try{
+         statement=connection.createStatement();
+         String sql="";
+         resultSet=statement.executeQuery(sql);
+ 	}catch(Exception ex){
+        Logger.getLogger(SimpleBot.class.getName()).log(Level.SEVERE, null, ex);
+	}
+            
 		Message message = update.getMessage();
 		if (message != null && message.hasText()) {
 			if (message.getText().equals("/help"))
