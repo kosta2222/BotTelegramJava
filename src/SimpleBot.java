@@ -1,7 +1,7 @@
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.telegram.telegrambots.TelegramApiException;
@@ -14,7 +14,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 public class SimpleBot extends TelegramLongPollingBot {
 ManagmentSystem ms=null;
 Connection connection=null;
-Statement statement=null;
+PreparedStatement preparedStatement=null;
 ResultSet resultSet=null;
     public SimpleBot() {
 	try{
@@ -48,21 +48,30 @@ Logger.getLogger(SimpleBot.class.getName()).log(Level.SEVERE, null, ex);
  
 	@Override
 	public void onUpdateReceived(Update update) {
+            Message message = update.getMessage();
+		if (message != null && message.hasText()) {
 	try{
-         statement=connection.createStatement();
-         String sql="";
-         resultSet=statement.executeQuery(sql);
+         preparedStatement=connection.prepareStatement("select cena from tovari_ceni where tovar=?");
+         preparedStatement.setString(0,message.getText());
+         
+         resultSet=preparedStatement.executeQuery();
+            while (resultSet.next()) {
+             sendMsg(message,resultSet.getString("cena"));   
+                
+                
+            }
  	}catch(Exception ex){
         Logger.getLogger(SimpleBot.class.getName()).log(Level.SEVERE, null, ex);
 	}
+                }
             
-		Message message = update.getMessage();
-		if (message != null && message.hasText()) {
-			if (message.getText().equals("/help"))
-				sendMsg(message, "ѕривет, € робот от Kosta");
-			else
-				sendMsg(message, "я не знаю что ответить на это");
-		}
+//		Message message = update.getMessage();
+//		if (message != null && message.hasText()) {
+//			if (message.getText().equals("/help"))
+//				sendMsg(message, "ѕривет, € робот от Kosta");
+//			else
+//				sendMsg(message, "я не знаю что ответить на это");
+//		}
 	}
  
 	private void sendMsg(Message message, String text) {
